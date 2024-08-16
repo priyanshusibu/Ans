@@ -1,0 +1,26 @@
+from collections import defaultdict
+from collections import deque
+
+def getRequestStatus(requests):
+    request_logs = defaultdict(lambda: deque())
+    result = []
+    
+    for i in range(len(requests)):
+        domain = requests[i]
+        current_time = i
+        
+        # Filter out timestamps that are outside the 30 seconds window
+        while request_logs[domain] and request_logs[domain][0] <= current_time - 30:
+            request_logs[domain].popleft()
+        
+        # Check if requests within the last 5 seconds exceed the limit of 2
+        last_5_seconds_requests = [t for t in request_logs[domain] if t > current_time - 5]
+        if len(last_5_seconds_requests) >= 2:
+            result.append("{status: 429, message: Too many requests}")
+        elif len(request_logs[domain]) >= 5:
+            result.append("{status: 429, message: Too many requests}")
+        else:
+            request_logs[domain].append(current_time)
+            result.append("{status: 200, message: OK}")
+    
+    return result
